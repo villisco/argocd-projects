@@ -1,0 +1,45 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: project1
+  namespace: argocd
+spec:
+  destinations:
+    # allowed cluster+namespace destinations
+    - name: in-cluster
+      namespace: namespace1
+      server: https://kubernetes.default.svc
+    - name: in-cluster
+      namespace: namespace2
+      server: https://kubernetes.default.svc
+  sourceNamespaces:
+    # allowed deployment namespaces
+    - namespace1
+    - namespace2
+  roles:
+    - name: read-only
+      description: Read-only privileges to all apps in project1 project
+      policies:
+        # p, <role/user/group>, <resource>, <action>, <appproject>/<object>
+        - p, proj:project1:read-only, applications, get, project1/*, allow
+      groups:
+        # add this group to users in keycloak
+        - project1_read-only
+    - name: developer
+      description: Developer privileges to all apps in project
+      policies:
+        # allow all app actions except delete,create
+        - p, proj:project1:developer, applications, *, project1/*, allow
+        - p, proj:project1:developer, applications, delete, project1/*, deny
+        - p, proj:project1:developer, applications, create, project1/*, deny
+        # allow viewing project
+        - p, proj:project1:developer, projects, get, project1/*, allow
+        # allow viewing projects repositories
+        - p, proj:project1:developer, repositories, get, project1/*, allow
+        # allow viewing pod logs
+        - p, proj:project1:developer, logs, get, project1/*, allow
+        # do not allow exec into pods
+        - p, proj:project1:developer, exec, create, project1/*, deny
+      groups:
+        # add this group to users in keycloak
+        - project1_developer

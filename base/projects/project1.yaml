@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: project1
+  namespace: argocd
+spec:
+  description: "example project1"
+  clusterResourceWhitelist:
+    # Deny all cluster-scoped resources from being created, except for Namespace
+    - group: ''
+      kind: Namespace
+  namespaceResourceWhitelist:
+    # allowed resources to be created inside namespace ('*' means all)
+    - group: '*'
+      kind: '*'
+  sourceRepos:
+    # allowed sync sources (manifests)
+    - https://<repo_url>/zipkin.git
